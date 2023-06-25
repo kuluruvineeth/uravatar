@@ -1,6 +1,7 @@
 import { Box, Button, Flex, SimpleGrid, VStack } from "@chakra-ui/react";
 import Link from "next/link";
 import { HiArrowRight } from "react-icons/hi";
+import Demo from "./Demo";
 const Hero = () => {
   return (
     <Box px={{ base: 2, md: 6 }}>
@@ -55,7 +56,9 @@ const Hero = () => {
             Start Creating Now
           </Button>
         </VStack>
-        <Flex alignItems="center">The Demo Component has to be used here</Flex>
+        <Flex alignItems="center">
+          <Demo />
+        </Flex>
       </SimpleGrid>
     </Box>
   );
