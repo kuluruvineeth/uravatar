@@ -90,7 +90,7 @@ const Prompts = () => {
                     colorScheme="beige"
                     variant="outline"
                     rightIcon={<BsArrowRight />}
-                    href=""
+                    href={`/prompts/dreambooth/${prompt.slug}`}
                     as={Link}
                     size="sm"
                   >
