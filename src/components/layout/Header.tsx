@@ -30,7 +30,7 @@ const Header = () => {
         <HStack spacing={1}>
           <Button
             as={Link}
-            href=""
+            href="/prompts"
             colorScheme="beige"
             variant="ghost"
             size="sm"
