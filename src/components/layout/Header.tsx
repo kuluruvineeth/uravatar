@@ -37,7 +37,7 @@ const Header = () => {
           >
             Prompts
           </Button>
-          <Button href="" as={Link} variant="brand" size="sm">
+          <Button href="/login" as={Link} variant="brand" size="sm">
             Login
           </Button>
         </HStack>
