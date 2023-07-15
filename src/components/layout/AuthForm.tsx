@@ -24,7 +24,7 @@ export default function AuthForm() {
     isLoading,
     isSuccess,
   } = useMutation("login", () =>
-    signIn("email", { email, redirect: false, callbackUrl: "/prompts" })
+    signIn("email", { email, redirect: false, callbackUrl: "/dashboard" })
   );
 
   if (isSuccess) {
