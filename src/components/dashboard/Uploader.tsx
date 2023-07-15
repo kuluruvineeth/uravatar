@@ -1,4 +1,4 @@
-import { createPreviewMedia } from "@/core/utils/upload";
+import { createPreviewMedia, resizeImage } from "@/core/utils/upload";
 import {
   Box,
   Center,
@@ -11,13 +11,20 @@ import {
   Flex,
   Icon,
   Button,
+  Spinner,
+  SimpleGrid,
+  FormControl,
+  Input,
+  Select,
+  FormHelperText,
 } from "@chakra-ui/react";
 import { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import AvatarsPlaceholder from "../home/AvatarsPlaceholder";
 import { CheckedListItem } from "../home/Pricing";
 import { IoIosClose } from "react-icons/io";
-import { MdCloud } from "react-icons/md";
+import { MdCheckCircle, MdCloud } from "react-icons/md";
+import { useS3Upload } from "next-s3-upload";
 
 type TUploadState = "not_uploaded" | "uploading" | "uploaded";
 
@@ -30,8 +37,36 @@ const Uploader = ({}) => {
   const [files, setFiles] = useState<FilePreview[]>([]);
   const [uploadState, setUploadState] = useState<TUploadState>("not_uploaded");
   const [urls, setUrls] = useState<string[]>([]);
+  const [studioName, setStudioName] = useState<string>("");
+  const [instanceClass, setInstanceClass] = useState<string>("man");
 
   const toast = useToast();
+  const { uploadToS3 } = useS3Upload();
+
+  const handleUpload = async () => {
+    if (files.length < 5) {
+      toast({
+        title: "You need to upload at least 5 photos",
+        duration: 3000,
+        isClosable: true,
+        position: "top-right",
+        status: "error",
+      });
+      return;
+    }
+
+    const filesToUpload = Array.from(files);
+    setUploadState("uploading");
+
+    for (let index = 0; index < filesToUpload.length; index++) {
+      const file = await resizeImage(filesToUpload[index]);
+      const { url } = await uploadToS3(file);
+
+      setUrls((current) => [...current, url]);
+    }
+
+    setUploadState("uploaded");
+  };
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -137,6 +172,14 @@ const Uploader = ({}) => {
             key={file.name}
           >
             <Center top={-2} right={-2} position="absolute">
+              {uploadState === "uploading" && !urls[index] && (
+                <Spinner
+                  size="lg"
+                  thickness="8px"
+                  speed="1s"
+                  color="brand.500"
+                />
+              )}
               {uploadState !== "uploading" && !urls[index] && (
                 <Icon
                   cursor="pointer"
@@ -146,6 +189,16 @@ const Uploader = ({}) => {
                   borderRadius="full"
                   backgroundColor="brand.500"
                   as={IoIosClose}
+                  fontSize="2rem"
+                />
+              )}
+
+              {urls[index] && (
+                <Icon
+                  borderRadius="full"
+                  backgroundColor="white"
+                  color="green.400"
+                  as={MdCheckCircle}
                   fontSize="2rem"
                 />
               )}
@@ -173,7 +226,7 @@ const Uploader = ({}) => {
             isLoading={uploadState === "uploading"}
             rightIcon={<MdCloud />}
             size="lg"
-            onClick={() => {}}
+            onClick={handleUpload}
             variant="brand"
           >
             {files.length < 5
@@ -181,6 +234,61 @@ const Uploader = ({}) => {
               : `Upload ${files.length} photo${files.length > 1 && "s"}`}
           </Button>
         </Box>
+      )}
+
+      {uploadState === "uploaded" && (
+        <SimpleGrid
+          gap={4}
+          columns={{ base: 1, md: 3 }}
+          as="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
+          mt={4}
+          alignItems="flex-start"
+        >
+          <FormControl>
+            <Input
+              isRequired
+              backgroundColor="white"
+              placeholder="Studio name"
+              value={studioName}
+              onChange={(e) => setStudioName(e.currentTarget.value)}
+            />
+          </FormControl>
+          <FormControl>
+            <Select
+              value={instanceClass}
+              onChange={(e) => setInstanceClass(e.currentTarget.value)}
+              backgroundColor="white"
+            >
+              <option value="man">Man</option>
+              <option value="woman">Woman</option>
+              <option value="child">Child</option>
+              <option value="dog">Dog</option>
+              <option value="cat">Cat</option>
+              <option value="couple">Couple</option>
+              <option value="style">Style</option>
+            </Select>
+            <FormHelperText color="blackAlpha.600">
+              Tyoe of the subject
+            </FormHelperText>
+          </FormControl>
+          <Box>
+            <Button
+              disabled={!Boolean(studioName)}
+              isLoading={false}
+              variant="brand"
+              rightIcon={<MdCheckCircle />}
+              onClick={() => {
+                if (studioName && instanceClass) {
+                }
+              }}
+            >
+              Create your Studio
+            </Button>
+          </Box>
+        </SimpleGrid>
       )}
     </Box>
   );
