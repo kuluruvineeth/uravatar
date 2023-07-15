@@ -10,7 +10,11 @@ import {
 import React from "react";
 import { HiBadgeCheck } from "react-icons/hi";
 
-const CheckedListItem = ({ children }: { children: React.ReactNode }) => (
+export const CheckedListItem = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => (
   <ListItem>
     <ListIcon fontSize="xl" as={HiBadgeCheck} /> {children}
   </ListItem>
