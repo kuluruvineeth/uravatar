@@ -271,7 +271,7 @@ const Uploader = ({}) => {
               <option value="style">Style</option>
             </Select>
             <FormHelperText color="blackAlpha.600">
-              Tyoe of the subject
+              Type of the subject
             </FormHelperText>
           </FormControl>
           <Box>
