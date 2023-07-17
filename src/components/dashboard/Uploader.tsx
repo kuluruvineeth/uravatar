@@ -25,6 +25,9 @@ import { CheckedListItem } from "../home/Pricing";
 import { IoIosClose } from "react-icons/io";
 import { MdCheckCircle, MdCloud } from "react-icons/md";
 import { useS3Upload } from "next-s3-upload";
+import UploadErrorMessages from "./UploadErrorMessages";
+import { useMutation } from "react-query";
+import axios from "axios";
 
 type TUploadState = "not_uploaded" | "uploading" | "uploaded";
 
@@ -32,7 +35,7 @@ export type FilePreview = (File | Blob) & { preview: string };
 
 const MAX_FILES = 25;
 
-const Uploader = ({}) => {
+const Uploader = ({ handleOnAdd }: { handleOnAdd: () => void }) => {
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [files, setFiles] = useState<FilePreview[]>([]);
   const [uploadState, setUploadState] = useState<TUploadState>("not_uploaded");
@@ -67,6 +70,36 @@ const Uploader = ({}) => {
 
     setUploadState("uploaded");
   };
+
+  const { mutate: handleCreateProject, isLoading } = useMutation(
+    "create-project",
+    () =>
+      axios.post("/api/projects", {
+        urls,
+        studioName,
+        instanceClass,
+      }),
+    {
+      onSuccess: () => {
+        handleOnAdd();
+
+        //Reset
+        setFiles([]);
+        setUrls([]);
+        setStudioName("");
+        setInstanceClass("");
+        setUploadState("not_uploaded");
+
+        toast({
+          title: "Studio created!",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+          status: "success",
+        });
+      },
+    }
+  );
 
   const { getRootProps, getInputProps } = useDropzone({
     accept: {
@@ -158,6 +191,9 @@ const Uploader = ({}) => {
                 </CheckedListItem>
               </List>
             </Box>
+            {errorMessages?.length !== 0 && (
+              <UploadErrorMessages messages={errorMessages} />
+            )}
           </VStack>
         </Center>
       )}
@@ -243,6 +279,7 @@ const Uploader = ({}) => {
           as="form"
           onSubmit={(e) => {
             e.preventDefault();
+            handleCreateProject();
           }}
           mt={4}
           alignItems="flex-start"
@@ -277,11 +314,13 @@ const Uploader = ({}) => {
           <Box>
             <Button
               disabled={!Boolean(studioName)}
-              isLoading={false}
+              isLoading={isLoading}
               variant="brand"
               rightIcon={<MdCheckCircle />}
-              onClick={() => {
+              onClick={(e) => {
                 if (studioName && instanceClass) {
+                  e.preventDefault();
+                  handleCreateProject();
                 }
               }}
             >

@@ -3,6 +3,8 @@ import PageContainer from "@/components/layout/PageContainer";
 import { Box, Heading } from "@chakra-ui/react";
 import { GetServerSidePropsContext } from "next";
 import { getSession } from "next-auth/react";
+import { useQuery } from "react-query";
+import axios from "axios";
 
 export default function Dashboard() {
   return (
@@ -11,7 +13,7 @@ export default function Dashboard() {
         <Heading as="h2" mb={4} fontWeight="semibold" fontSize="2xl">
           Create a new studio
         </Heading>
-        <Uploader />
+        <Uploader handleOnAdd={() => {}} />
       </Box>
     </PageContainer>
   );
