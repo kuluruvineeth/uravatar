@@ -10,9 +10,12 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { Project } from "@prisma/client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckedListItem } from "../home/Pricing";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useQuery } from "react-query";
+import axios from "axios";
 
 const FormPayment = ({
   project,
@@ -22,6 +25,25 @@ const FormPayment = ({
   handlePaymentSuccess: () => void;
 }) => {
   const [waitingPayment, setWaitingPayment] = useState(false);
+  const { query } = useRouter();
+
+  useQuery(
+    "check-payment",
+    () =>
+      axios.get(`/api/checkout/check/${query.ppi}/${query.session_id}/studio`),
+    {
+      cacheTime: 0,
+      refetchInterval: 10,
+      enabled: waitingPayment,
+      onSuccess: () => {
+        handlePaymentSuccess();
+      },
+    }
+  );
+
+  useEffect(() => {
+    setWaitingPayment(query.ppi === project.id);
+  }, [query, project]);
 
   return (
     <Box textAlign="center" width="100%">
@@ -65,7 +87,11 @@ const FormPayment = ({
               exhausted
             </CheckedListItem>
           </List>
-          <Button as={Link} variant="brand" href="">
+          <Button
+            as={Link}
+            variant="brand"
+            href={`/api/checkout/session?ppi=${project.id}`}
+          >
             Unlock Now - {formatStudioPrice()}
           </Button>
           <Box pt={4}>
