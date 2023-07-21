@@ -11,7 +11,9 @@ import {
   PopoverTrigger,
   useToast,
 } from "@chakra-ui/react";
+import axios from "axios";
 import { BsTrash } from "react-icons/bs";
+import { useMutation } from "react-query";
 
 const ProjectDeleteButton = ({
   projectId,
@@ -21,6 +23,23 @@ const ProjectDeleteButton = ({
   handleRemove: () => void;
 }) => {
   const toast = useToast();
+
+  const { isLoading, mutate: deleteProject } = useMutation(
+    "delete-project",
+    () => axios.delete(`/api/projects/${projectId}`),
+    {
+      onSuccess: () => {
+        toast({
+          title: "Studio deleted",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+          status: "success",
+        });
+        handleRemove();
+      },
+    }
+  );
 
   return (
     <Popover>
@@ -45,7 +64,13 @@ const ProjectDeleteButton = ({
                 <Button onClick={onClose} variant="outline">
                   Cancel
                 </Button>
-                <Button colorScheme="red" onClick={() => {}} isLoading={false}>
+                <Button
+                  colorScheme="red"
+                  onClick={() => {
+                    deleteProject();
+                  }}
+                  isLoading={false}
+                >
                   Delete
                 </Button>
               </ButtonGroup>
