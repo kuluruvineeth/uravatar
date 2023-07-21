@@ -18,6 +18,9 @@ import { IoIosFlash } from "react-icons/io";
 import { HiArrowRight } from "react-icons/hi";
 import Link from "next/link";
 import FormPayment from "./FormPayment";
+import { useMutation } from "react-query";
+import { Project } from "@prisma/client";
+import axios from "axios";
 
 const ProjectCard = ({
   project,
@@ -26,6 +29,22 @@ const ProjectCard = ({
   project: ProjectWithShots;
   handleRefreshProjects: () => void;
 }) => {
+  const {
+    mutate: trainModel,
+    isLoading: isModelLoading,
+    isSuccess,
+  } = useMutation(
+    `train-model-${project.id}`,
+    (project: Project) =>
+      axios.post(`/api/projects/${project.id}/train`, {
+        prompt,
+      }),
+    {
+      onSuccess: () => {
+        handleRefreshProjects();
+      },
+    }
+  );
   const isWaitingPayement = !project.stripePaymentId;
 
   const isWaitingTraining =
@@ -93,7 +112,9 @@ const ProjectCard = ({
                 variant="brand"
                 rightIcon={<IoIosFlash />}
                 isLoading={false}
-                onClick={() => {}}
+                onClick={() => {
+                  trainModel(project);
+                }}
               >
                 Start Training
               </Button>
@@ -104,7 +125,7 @@ const ProjectCard = ({
         {isReady && (
           <Center overflow="hidden" width="100%" marginX="auto">
             <VStack spacing={7}>
-              {!project.shots ? (
+              {project.shots.length == 0 ? (
                 <Box fontSize="lg">
                   {`You don't have any prompt yet`}.{" "}
                   <b>Go to your studio to add one !</b>
