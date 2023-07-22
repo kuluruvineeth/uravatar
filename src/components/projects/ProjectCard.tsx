@@ -142,7 +142,7 @@ const ProjectCard = ({
               <Button
                 rightIcon={<HiArrowRight />}
                 variant="brand"
-                href=""
+                href={`/studio/${project.id}`}
                 as={Link}
               >
                 View my Studio

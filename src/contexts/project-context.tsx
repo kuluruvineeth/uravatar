@@ -4,7 +4,7 @@ import axios from "axios";
 import { RefObject, createContext, ReactNode, useRef, useState } from "react";
 import { useQuery } from "react-query";
 
-const SHOTS_PER_PAGE = 9;
+export const SHOTS_PER_PAGE = 9;
 
 export const ProjectContext = createContext<{
   shots: Shot[];
