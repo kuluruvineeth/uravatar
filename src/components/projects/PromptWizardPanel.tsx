@@ -1,13 +1,33 @@
 import useProjectContext from "@/hooks/use-project-context";
 import { Button, Input, Text, VStack } from "@chakra-ui/react";
+import axios from "axios";
+import { useRouter } from "next/router";
 import { useState } from "react";
 import { FaMagic } from "react-icons/fa";
+import { useMutation } from "react-query";
 
 const PromptWizardPanel = ({ onClose }: { onClose: () => void }) => {
   const { promptInputRef, updatePromptWizardCredits, promptWizardCredits } =
     useProjectContext();
-
+  const { query } = useRouter();
   const [keyword, setKeyword] = useState<string>("");
+
+  const { mutate: createPrompt, isLoading: isLoadingPrompt } = useMutation(
+    "create-prompt",
+    (keyword: string) =>
+      axios.post(`/api/projects/${query.id}/prompter`, {
+        keyword,
+      }),
+    {
+      onSuccess: (response) => {
+        const { prompt } = response.data;
+        promptInputRef.current!.value = prompt;
+        updatePromptWizardCredits(response.data.promptWizardCredits);
+        setKeyword("");
+        onClose();
+      },
+    }
+  );
 
   return (
     <VStack
@@ -20,6 +40,7 @@ const PromptWizardPanel = ({ onClose }: { onClose: () => void }) => {
         e.stopPropagation();
 
         if (keyword) {
+          createPrompt(keyword);
         }
       }}
     >

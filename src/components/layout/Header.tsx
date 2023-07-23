@@ -1,8 +1,19 @@
-import { Button, Flex, HStack, Icon, Text } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  HStack,
+  Icon,
+  IconButton,
+  Text,
+  Tooltip,
+} from "@chakra-ui/react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
+import { HiLogout } from "react-icons/hi";
 import { IoIosFlash } from "react-icons/io";
 
 const Header = () => {
+  const { data: session, status } = useSession();
   return (
     <Flex
       width="100%"
@@ -37,9 +48,40 @@ const Header = () => {
           >
             Prompts
           </Button>
-          <Button href="/login" as={Link} variant="brand" size="sm">
-            Login
-          </Button>
+          {session ? (
+            <>
+              <Tooltip hasArrow label="Public Gallery">
+                <Button
+                  href={`/gallery/${session.userId}`}
+                  as={Link}
+                  colorScheme="beige"
+                  variant="ghost"
+                  size="sm"
+                >
+                  My Gallery
+                </Button>
+              </Tooltip>
+              <Button href="/dashboard" as={Link} variant="brand" size="sm">
+                Dashboard
+              </Button>
+              <Tooltip hasArrow label="Logout">
+                <IconButton
+                  aria-label="logout"
+                  icon={<HiLogout />}
+                  size="sm"
+                  colorScheme="biege"
+                  variant="ghost"
+                  onClick={() => {
+                    signOut({ callbackUrl: "/" });
+                  }}
+                />
+              </Tooltip>
+            </>
+          ) : (
+            <Button href="/login" as={Link} variant="brand" size="sm">
+              Login
+            </Button>
+          )}
         </HStack>
       </Flex>
     </Flex>

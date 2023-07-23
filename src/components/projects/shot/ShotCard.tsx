@@ -73,6 +73,42 @@ const ShotCard = ({
     }
   );
 
+  const { mutate: createHd, isLoading: isCreatingHd } = useMutation(
+    `create-hd-${initialShot.id}`,
+    () =>
+      axios.post<{ shot: Shot }>(
+        `/api/projects/${query.id}/predictions/${initialShot.id}/hd`
+      ),
+    {
+      onSuccess: (response) => {
+        setShot(response.data.shot);
+      },
+    }
+  );
+
+  useQuery(
+    `shot-hd-${initialShot.id}`,
+    () =>
+      axios
+        .get<{ shot: Shot }>(
+          `api/projects/${query.id}/predictions/${initialShot.id}/hd`
+        )
+        .then((res) => res.data),
+    {
+      refetchInterval: (data) =>
+        data?.shot.hdStatus !== "PENDING" ? false : 5000,
+      refetchOnWindowFocus: false,
+      enabled: shot.hdStatus === "PENDING",
+      initialData: { shot: initialShot },
+      onSuccess: (response) => {
+        setShot(response.shot);
+        if (response.shot.hdOuputUrl) {
+          setIsHd(true);
+        }
+      },
+    }
+  );
+
   useQuery(
     `shot-${initialShot.id}`,
     () =>
@@ -130,6 +166,7 @@ const ShotCard = ({
                 <IconButton
                   size="sm"
                   onClick={() => {
+                    handleSeed(shot);
                     window.scrollTo({
                       top: 0,
                       left: 0,
@@ -162,6 +199,7 @@ const ShotCard = ({
                     isLoading={shot.hdStatus === "PENDING"}
                     onClick={() => {
                       if (shot.hdStatus === "NO") {
+                        createHd();
                       } else if (
                         shot.hdStatus === "PROCESSED" &&
                         shot.hdOuputUrl
@@ -188,8 +226,8 @@ const ShotCard = ({
                 aria-label="Bookmark"
                 fontSize="md"
                 icon={shot.bookmarked ? <BsHeartFill /> : <BsHeart />}
-                onClick={() => {}}
-                pointerEvents={undefined}
+                onClick={() => bookmark(!shot.bookmarked)}
+                pointerEvents={isLoading ? "none" : "auto"}
                 color={shot.bookmarked ? "red" : "inherit"}
               />
             </Tooltip>
