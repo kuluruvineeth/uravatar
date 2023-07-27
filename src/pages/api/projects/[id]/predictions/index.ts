@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { unstable_getServerSession } from "next-auth";
 import db from "@/core/db";
 import replicateClient from "@/core/clients/replicate";
 import { replacePromptToken } from "@/core/utils/predictions";
@@ -10,14 +11,14 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const image = req.body.image as string;
 
   const projectId = req.query.id as string;
-  const session = await getSession({ req });
+  const session = await unstable_getServerSession(req, res, authOptions);
 
-  //   if (!session?.user) {
-  //     return res.status(401).json({ message: "Not Authenticated" });
-  //   }
+  if (!session?.user) {
+    return res.status(401).json({ message: "Not Authenticated" });
+  }
 
   const project = await db.project.findFirstOrThrow({
-    where: { id: projectId, userId: "clk26d51p0000vngv48pnwjgx" },
+    where: { id: projectId, userId: session.userId },
   });
 
   if (project.credits < 1) {

@@ -1,17 +1,18 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import db from "@/core/db";
 import { createZipFolder } from "@/core/utils/assets";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import s3Client from "@/core/clients/s3";
 import replicateClient from "@/core/clients/replicate";
+import { authOptions } from "../auth/[...nextauth]";
+import { unstable_getServerSession } from "next-auth/next";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession({ req });
+  const session = await unstable_getServerSession(req, res, authOptions);
 
-  //   if (!session?.user) {
-  //     return res.status(401).json({ message: "Not Authenticated" });
-  //   }
+  if (!session?.user) {
+    return res.status(401).json({ message: "Not Authenticated" });
+  }
 
   if (req.method === "POST") {
     const urls = req.body.urls as string[];
@@ -22,7 +23,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       data: {
         imageUrls: urls,
         name: studioName,
-        userId: "clk26d51p0000vngv48pnwjgx",
+        userId: session.userId,
         modelStatus: "not_created",
         instanceClass: instanceClass || "person",
         instanceName: process.env.NEXT_PUBLIC_REPLICATE_INSTANCE_TOKEN!,
@@ -45,7 +46,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
 
   if (req.method === "GET") {
     const projects = await db.project.findMany({
-      where: { userId: "clk26d51p0000vngv48pnwjgx" },
+      where: { userId: session.userId },
       include: { shots: { take: 10, orderBy: { createdAt: "desc" } } },
       orderBy: { createdAt: "desc" },
     });

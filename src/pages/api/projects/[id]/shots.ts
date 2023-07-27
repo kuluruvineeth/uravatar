@@ -1,9 +1,10 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import db from "@/core/db";
+import { authOptions } from "../../auth/[...nextauth]";
+import { unstable_getServerSession } from "next-auth";
 
 const hanlder = async (req: NextApiRequest, res: NextApiResponse) => {
-  const session = await getSession({ req });
+  const session = await unstable_getServerSession(req, res, authOptions);
   const projectId = req.query.id as string;
 
   const { take, skip } = req.query;

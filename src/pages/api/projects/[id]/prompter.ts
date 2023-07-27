@@ -1,18 +1,19 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import db from "@/core/db";
 import openai from "@/core/clients/openai";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]";
 
 const hanlder = async (req: NextApiRequest, res: NextApiResponse) => {
   const projectId = req.query.id as string;
-  const session = await getSession({ req });
+  const session = await unstable_getServerSession(req, res, authOptions);
 
-  //   if (!session?.user) {
-  //     return res.status(401).json({ message: "Not authenticated" });
-  //   }
+  if (!session?.user) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
 
   let project = await db.project.findFirstOrThrow({
-    where: { id: projectId, userId: "clk26d51p0000vngv48pnwjgx" },
+    where: { id: projectId, userId: session.userId },
   });
 
   const keyword = req.body.keyword as string;

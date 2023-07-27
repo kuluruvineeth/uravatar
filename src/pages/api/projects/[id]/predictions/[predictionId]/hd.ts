@@ -1,5 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
+import { authOptions } from "@/pages/api/auth/[...nextauth]";
+import { unstable_getServerSession } from "next-auth";
 import db from "@/core/db";
 import replicateClient from "@/core/clients/replicate";
 import Replicate from "replicate";
@@ -12,7 +13,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const projectId = req.query.id as string;
   const predictionId = req.query.predictionId as string;
 
-  const session = await getSession({ req });
+  const session = await unstable_getServerSession(req, res, authOptions);
 
   if (!session?.user) {
     return res.status(401).json({ message: "Not authenticated" });

@@ -1,12 +1,13 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { getSession } from "next-auth/react";
 import db from "@/core/db";
 import s3Client from "@/core/clients/s3";
 import { DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { unstable_getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]";
 
 const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   const projectId = req.query.id as string;
-  const session = await getSession({ req });
+  const session = await unstable_getServerSession(req, res, authOptions);
 
   if (!session?.user) {
     return res.status(401).json({ message: "Not Authenticated" });

@@ -6,7 +6,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 });
 
 const PRICES = {
-  100: { price: 100, promptWizardQuantity: 20 },
+  100: { price: 20000, promptWizardQuantity: 20 },
   200: { price: 40000, promptWizardQuantity: 40 },
   300: { price: 60000, promptWizardQuantity: 60 },
 };
