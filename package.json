@@ -43,6 +43,7 @@
     "react-medium-image-zoom": "^5.1.2",
     "react-parallax-tilt": "^1.7.151",
     "react-query": "^3.39.3",
+    "replicate": "^0.13.0",
     "sharp": "^0.32.3",
     "smartcrop-sharp": "^2.0.7",
     "stripe": "^12.13.0",

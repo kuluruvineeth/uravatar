@@ -18,6 +18,7 @@ import Image from "next/image";
 import { useMutation } from "react-query";
 import { Project, Shot } from "@prisma/client";
 import axios from "axios";
+import BuyShotButton from "./shot/BuyShotButton";
 
 const PromptPanel = ({
   hasImageInputAvailable,
@@ -74,6 +75,13 @@ const PromptPanel = ({
       <Flex alignItems="center" justifyContent="space-between">
         <Text fontSize="2xl" fontWeight="semibold">
           Studio <b>{getRefinedStudioName(project)}</b>{" "}
+          <BuyShotButton
+            credits={shotCredits}
+            onPaymentSuccess={(credits, promptWizardCredits) => {
+              updateCredits(credits);
+              updatePromptWizardCredits(promptWizardCredits);
+            }}
+          />
         </Text>
       </Flex>
       <HStack mt={2}>

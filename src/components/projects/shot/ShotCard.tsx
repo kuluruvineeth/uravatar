@@ -61,7 +61,7 @@ const ShotCard = ({
     `update-shot-${initialShot.id}`,
     (bookmarked: boolean) =>
       axios.patch<{ shot: Shot }>(
-        `/api/projects/${query.id}/predictions/${initialShot.id}`,
+        `http://localhost:3001/api/projects/${query.id}/predictions/${initialShot.id}`,
         {
           bookmarked,
         }
@@ -87,29 +87,6 @@ const ShotCard = ({
   );
 
   useQuery(
-    `shot-hd-${initialShot.id}`,
-    () =>
-      axios
-        .get<{ shot: Shot }>(
-          `api/projects/${query.id}/predictions/${initialShot.id}/hd`
-        )
-        .then((res) => res.data),
-    {
-      refetchInterval: (data) =>
-        data?.shot.hdStatus !== "PENDING" ? false : 5000,
-      refetchOnWindowFocus: false,
-      enabled: shot.hdStatus === "PENDING",
-      initialData: { shot: initialShot },
-      onSuccess: (response) => {
-        setShot(response.shot);
-        if (response.shot.hdOuputUrl) {
-          setIsHd(true);
-        }
-      },
-    }
-  );
-
-  useQuery(
     `shot-${initialShot.id}`,
     () =>
       axios
@@ -124,6 +101,29 @@ const ShotCard = ({
       initialData: { shot: initialShot },
       onSuccess: (response) => {
         setShot(response.shot);
+      },
+    }
+  );
+
+  useQuery(
+    `shot-hd-${initialShot.id}`,
+    () =>
+      axios
+        .get<{ shot: Shot }>(
+          `/api/projects/${query.id}/predictions/${initialShot.id}/hd`
+        )
+        .then((res) => res.data),
+    {
+      refetchInterval: (data) =>
+        data?.shot.hdStatus !== "PENDING" ? false : 5000,
+      refetchOnWindowFocus: false,
+      enabled: shot.hdStatus === "PENDING",
+      initialData: { shot: initialShot },
+      onSuccess: (response) => {
+        setShot(response.shot);
+        if (response.shot.hdOuputUrl) {
+          setIsHd(true);
+        }
       },
     }
   );
