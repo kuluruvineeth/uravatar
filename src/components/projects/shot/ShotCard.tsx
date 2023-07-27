@@ -61,7 +61,7 @@ const ShotCard = ({
     `update-shot-${initialShot.id}`,
     (bookmarked: boolean) =>
       axios.patch<{ shot: Shot }>(
-        `http://localhost:3001/api/projects/${query.id}/predictions/${initialShot.id}`,
+        `/api/projects/${query.id}/predictions/${initialShot.id}`,
         {
           bookmarked,
         }
